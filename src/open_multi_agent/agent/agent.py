@@ -25,13 +25,6 @@ from .runner import AgentRunner, RunOptions, RunResult, RunnerOptions
 ZERO_USAGE = TokenUsage(input_tokens=0, output_tokens=0)
 
 
-def _add_usage(a: TokenUsage, b: TokenUsage) -> TokenUsage:
-    return TokenUsage(
-        input_tokens=a.input_tokens + b.input_tokens,
-        output_tokens=a.output_tokens + b.output_tokens,
-    )
-
-
 class Agent:
     """High-level wrapper around AgentRunner that manages conversation
     history, state transitions, and tool lifecycle."""
@@ -131,7 +124,7 @@ class Agent:
 
             result = await runner.run(messages, run_options)
 
-            self._state.token_usage = _add_usage(self._state.token_usage, result.token_usage)
+            self._state.token_usage = self._state.token_usage + result.token_usage
             self._transition_to("completed")
 
             return self._to_agent_run_result(result, True)
@@ -154,7 +147,7 @@ class Agent:
             async for event in runner.stream(messages):
                 if event.type == "done":
                     data = event.data
-                    self._state.token_usage = _add_usage(self._state.token_usage, data.token_usage)
+                    self._state.token_usage = self._state.token_usage + data.token_usage
                     self._transition_to("completed")
                 elif event.type == "error":
                     self._transition_to_error(str(event.data))

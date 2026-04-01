@@ -91,8 +91,8 @@ exchange_rate_tool = define_tool(
         "Get the current exchange rate between two currencies. "
         "Returns the rate as a decimal: 1 unit of `from` = N units of `to`."
     ),
-    input_model=ExchangeRateInput,
-    handler=get_exchange_rate_handler,
+    input_schema=ExchangeRateInput,
+    execute=get_exchange_rate_handler,
 )
 
 
@@ -122,8 +122,8 @@ async def format_currency_handler(
 format_currency_tool = define_tool(
     name="format_currency",
     description="Format a number as a localised currency string.",
-    input_model=FormatCurrencyInput,
-    handler=format_currency_handler,
+    input_schema=FormatCurrencyInput,
+    execute=format_currency_handler,
 )
 
 
@@ -270,7 +270,7 @@ async def main() -> None:
 
     print("\n--- Bonus: testing custom tools in isolation ---\n")
 
-    fmt_result = await format_currency_tool.handler(
+    fmt_result = await format_currency_tool.execute(
         FormatCurrencyInput(amount=1234.56, currency="EUR", locale_str="de_DE"),
         None,
     )

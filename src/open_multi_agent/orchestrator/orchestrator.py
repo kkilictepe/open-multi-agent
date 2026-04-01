@@ -32,13 +32,6 @@ DEFAULT_MAX_CONCURRENCY = 5
 DEFAULT_MODEL = "claude-opus-4-6"
 
 
-def _add_usage(a: TokenUsage, b: TokenUsage) -> TokenUsage:
-    return TokenUsage(
-        input_tokens=a.input_tokens + b.input_tokens,
-        output_tokens=a.output_tokens + b.output_tokens,
-    )
-
-
 def _build_agent(config: AgentConfig) -> Agent:
     registry = ToolRegistry()
     register_built_in_tools(registry)
@@ -490,7 +483,7 @@ class OpenMultiAgent:
         for key, result in agent_results.items():
             agent_name = key.split(":")[0] if ":" in key else key
 
-            total_usage = _add_usage(total_usage, result.token_usage)
+            total_usage = total_usage + result.token_usage
             if not result.success:
                 overall_success = False
 
@@ -504,7 +497,7 @@ class OpenMultiAgent:
                         filter(None, [existing.output, result.output])
                     ),
                     messages=[*existing.messages, *result.messages],
-                    token_usage=_add_usage(existing.token_usage, result.token_usage),
+                    token_usage=existing.token_usage + result.token_usage,
                     tool_calls=[*existing.tool_calls, *result.tool_calls],
                 )
 

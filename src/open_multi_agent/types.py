@@ -40,17 +40,17 @@ class ToolResultBlock(BaseModel):
     is_error: bool | None = None
 
 
-class ImageBlock(BaseModel):
-    model_config = ConfigDict(frozen=True)
-    type: Literal["image"] = "image"
-    source: ImageSource
-
-
 class ImageSource(BaseModel):
     model_config = ConfigDict(frozen=True)
     type: Literal["base64"] = "base64"
     media_type: str
     data: str
+
+
+class ImageBlock(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    type: Literal["image"] = "image"
+    source: ImageSource
 
 
 ContentBlock = Union[TextBlock, ToolUseBlock, ToolResultBlock, ImageBlock]
@@ -70,6 +70,12 @@ class TokenUsage(BaseModel):
     model_config = ConfigDict(frozen=True)
     input_tokens: int = 0
     output_tokens: int = 0
+
+    def __add__(self, other: TokenUsage) -> TokenUsage:
+        return TokenUsage(
+            input_tokens=self.input_tokens + other.input_tokens,
+            output_tokens=self.output_tokens + other.output_tokens,
+        )
 
 
 class LLMResponse(BaseModel):
@@ -98,12 +104,10 @@ class StreamEvent(BaseModel):
 
 
 class LLMToolDef(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, populate_by_name=True)
     name: str
     description: str
     input_schema: dict[str, Any] = Field(alias="inputSchema", default_factory=dict)
-
-    model_config = ConfigDict(frozen=True, populate_by_name=True)
 
 
 class ToolResult(BaseModel):

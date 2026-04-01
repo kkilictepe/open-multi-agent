@@ -63,13 +63,6 @@ def _extract_tool_use_blocks(content: list[ContentBlock]) -> list[ToolUseBlock]:
     return [b for b in content if isinstance(b, ToolUseBlock)]
 
 
-def _add_token_usage(a: TokenUsage, b: TokenUsage) -> TokenUsage:
-    return TokenUsage(
-        input_tokens=a.input_tokens + b.input_tokens,
-        output_tokens=a.output_tokens + b.output_tokens,
-    )
-
-
 ZERO_USAGE = TokenUsage(input_tokens=0, output_tokens=0)
 
 
@@ -149,7 +142,7 @@ class AgentRunner:
 
                 # Step 1: Call the LLM
                 response = await self._adapter.chat(conversation_messages, base_chat_options)
-                total_usage = _add_token_usage(total_usage, response.usage)
+                total_usage = total_usage + response.usage
 
                 # Step 2: Build assistant message
                 assistant_message = LLMMessage(role="assistant", content=response.content)
